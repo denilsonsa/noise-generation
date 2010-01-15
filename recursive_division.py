@@ -12,27 +12,28 @@
 #   elevation."
 
 
+from functools import partial
 import random
 import numpy
 from numpy import array, zeros
 from matplotlib import pyplot
 
 
-def f1(img):
+def f1(img, randfunc=random.random):
     '''This one does not quite work, but it is still pretty anyway. :)'''
     if max(img.shape)<=2:
         return
     mx = img.shape[0]/2
     my = img.shape[1]/2
     #print img.shape, mx, my
-    img[mx,my] = (img[0,0] + img[0,-1] + img[-1,0] + img[-1,-1])/4 + random.random()
-    f1(img[  :mx+1,   :my+1])
-    f1(img[mx:    ,   :my+1])
-    f1(img[  :mx+1, my:    ])
-    f1(img[mx:    , my:    ])
+    img[mx,my] = (img[0,0] + img[0,-1] + img[-1,0] + img[-1,-1])/4 + randfunc()
+    f1(img[  :mx+1,   :my+1], randfunc)
+    f1(img[mx:    ,   :my+1], randfunc)
+    f1(img[  :mx+1, my:    ], randfunc)
+    f1(img[mx:    , my:    ], randfunc)
 
 
-def f2(img):
+def f2(img, randfunc=random.random):
     '''Second try... Not what I expected, but nice anyway! :)'''
     if max(img.shape)<=1:
         return
@@ -41,7 +42,7 @@ def f2(img):
     mx = tx/2  # mean x
     my = ty/2  # mean y
     #print img.shape, mx, my
-    img[mx,my] = (img[0,0] + img[0,-1] + img[-1,0] + img[-1,-1])/4 + random.random()
+    img[mx,my] = (img[0,0] + img[0,-1] + img[-1,0] + img[-1,-1])/4 + randfunc()
     
     cuts = [
         ((0 ,mx+1),(0 ,my+1)),
@@ -54,10 +55,10 @@ def f2(img):
         if (ax < bx or ay < by) and not (
             ax == 0 and bx == tx and ay == 0 and by == ty
         ):
-            f2(img[ax:bx, ay:by])
+            f2(img[ax:bx, ay:by], randfunc)
 
 
-def f3(img):
+def f3(img, randfunc=random.random):
     '''Third try... Now I got something that remotely looks like a noise!'''
     if max(img.shape)<=2:
         return
@@ -76,7 +77,7 @@ def f3(img):
     img[mx, 0] = (img[ 0, 0] + img[-1, 0])/2 + random.random()
     img[mx,-1] = (img[ 0,-1] + img[-1,-1])/2 + random.random()
 
-    img[mx,my] = (img[0,0] + img[0,-1] + img[-1,0] + img[-1,-1])/4 + random.random()
+    img[mx,my] = (img[0,0] + img[0,-1] + img[-1,0] + img[-1,-1])/4 + randfunc()
     
     cuts = [
         ((0 ,mx+1),(0 ,my+1)),
@@ -89,19 +90,28 @@ def f3(img):
         if (ax < bx or ay < by) and not (
             ax == 0 and bx == tx and ay == 0 and by == ty
         ):
-            f3(img[ax:bx, ay:by])
+            f3(img[ax:bx, ay:by], randfunc)
 
 
 
 functions = [
-    ("f1()", f1),
-    ("f2()", f2),
-    ("f3()", f3),
+    # It missed many pixels but it's still interesting
+    ("f1(random())", f1, random.random),
+
+    # Looks good, but does not look uniform
+    ("f2(random())", f2, random.random),
+    # Great-looking cloud-like noise!
+    ("f2(-0.5 to 0.5)", f2, lambda:random.random()-0.5),
+
+    # Looks kinda grid-like
+    ("f3(random())", f3, random.random),
+    # Looks kinda grid-like
+    ("f3(-0.5 to 0.5)", f3, lambda:random.random()-0.5),
 ]
 
-for funcname, func in functions:
+for funcname, func, randfunc in functions:
     print funcname
     img = zeros((128,128))
-    func(img)
+    func(img, randfunc)
     pyplot.imshow(img)
     pyplot.show()
