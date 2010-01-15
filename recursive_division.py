@@ -17,10 +17,11 @@ import random
 import numpy
 from numpy import array, zeros
 from matplotlib import pyplot
+from matplotlib import cm  # colormaps
 
 
 def f1(img, randfunc=random.random):
-    '''This one does not quite work, but it is still pretty anyway. :)'''
+    '''First try... This one does not quite work, but it is still pretty anyway. :)'''
     if max(img.shape)<=2:
         return
     mx = img.shape[0]/2
@@ -34,7 +35,7 @@ def f1(img, randfunc=random.random):
 
 
 def f2(img, randfunc=random.random):
-    '''Second try... Not what I expected, but nice anyway! :)'''
+    '''Second try...'''
     if max(img.shape)<=1:
         return
     tx = img.shape[0]  # total x
@@ -59,7 +60,7 @@ def f2(img, randfunc=random.random):
 
 
 def f3(img, randfunc=random.random):
-    '''Third try... Now I got something that remotely looks like a noise!'''
+    '''Third try...'''
     if max(img.shape)<=2:
         return
     tx = img.shape[0]  # total x
@@ -109,9 +110,20 @@ functions = [
     ("f3(-0.5 to 0.5)", f3, lambda:random.random()-0.5),
 ]
 
-for funcname, func, randfunc in functions:
-    print funcname
-    img = zeros((128,128))
-    func(img, randfunc)
-    pyplot.imshow(img)
-    pyplot.show()
+
+def main():
+    size = (128, 128)
+    #colormap = cm.gray
+    colormap = cm.jet
+
+    for funcname, func, randfunc in functions:
+        print funcname
+        img = zeros(size)
+        func(img, randfunc)
+        #pyplot.imshow(img, cmap=colormap)
+        #pyplot.show()
+        pyplot.imsave(fname=funcname+".png", arr=img, cmap=colormap)
+
+
+if __name__ == '__main__':
+    main()
