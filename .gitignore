@@ -1,4 +1,3 @@
-syntax: glob
 # The following list was copied from ~/.subversion/config
 *.o
 *.lo
